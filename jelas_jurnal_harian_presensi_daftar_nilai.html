@@ -1,0 +1,2764 @@
+<!DOCTYPE html>
+<html lang="id" class="light" data-theme-color="gold">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JELAS - Jurnal Harian Guru, Presensi & Daftar Nilai Murid</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        gold: { 
+                            50: 'var(--color-primary-50)', 
+                            100: 'var(--color-primary-100)', 
+                            200: 'var(--color-primary-200)', 
+                            300: 'var(--color-primary-300)', 
+                            400: 'var(--color-primary-400)', 
+                            500: 'var(--color-primary-500)', 
+                            600: 'var(--color-primary-600)', 
+                            700: 'var(--color-primary-700)', 
+                            800: 'var(--color-primary-800)', 
+                            900: 'var(--color-primary-900)', 
+                            950: 'var(--color-primary-950)' 
+                        },
+                        cream: '#FDFBF7',
+                        dark: '#121212',
+                        darker: '#0a0a0a',
+                        darkcard: '#1e1e1e'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- SheetJS (Excel Engine) -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <!-- jsPDF & AutoTable (PDF Engine) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root, [data-theme-color="gold"] {
+            --color-primary-50: #fbf9f1;
+            --color-primary-100: #f5f0d9;
+            --color-primary-200: #ebe1b5;
+            --color-primary-300: #deca85;
+            --color-primary-400: #d1af54;
+            --color-primary-500: #c59535;
+            --color-primary-600: #ac7528;
+            --color-primary-700: #895522;
+            --color-primary-800: #724522;
+            --color-primary-900: #613a21;
+            --color-primary-950: #381f10;
+        }
+
+        [data-theme-color="emerald"] {
+            --color-primary-50: #ecfdf5;
+            --color-primary-100: #d1fae5;
+            --color-primary-200: #a7f3d0;
+            --color-primary-300: #6ee7b7;
+            --color-primary-400: #34d399;
+            --color-primary-500: #10b981;
+            --color-primary-600: #059669;
+            --color-primary-700: #047857;
+            --color-primary-800: #065f46;
+            --color-primary-900: #064e3b;
+            --color-primary-950: #022c22;
+        }
+
+        [data-theme-color="indigo"] {
+            --color-primary-50: #eef2ff;
+            --color-primary-100: #e0e7ff;
+            --color-primary-200: #c7d2fe;
+            --color-primary-300: #a5b4fc;
+            --color-primary-400: #818cf8;
+            --color-primary-500: #6366f1;
+            --color-primary-600: #4f46e5;
+            --color-primary-700: #4338ca;
+            --color-primary-800: #3730a3;
+            --color-primary-900: #312e81;
+            --color-primary-950: #1e1b4b;
+        }
+
+        [data-theme-color="rose"] {
+            --color-primary-50: #fff1f2;
+            --color-primary-100: #ffe4e6;
+            --color-primary-200: #fecdd3;
+            --color-primary-300: #fda4af;
+            --color-primary-400: #fb7185;
+            --color-primary-500: #f43f5e;
+            --color-primary-600: #e11d48;
+            --color-primary-700: #be123c;
+            --color-primary-800: #9f1239;
+            --color-primary-900: #881337;
+            --color-primary-950: #4c0519;
+        }
+
+        body { -webkit-font-smoothing: antialiased; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-cream text-slate-800 dark:bg-darker dark:text-slate-200 transition-colors duration-300 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, createContext, useContext, useRef } = React;
+
+        // Image compression helper to avoid localStorage QuotaExceededError
+        const compressImage = (file, maxWidth = 300, maxHeight = 300, quality = 0.85) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round((width * maxHeight) / height);
+                                height = maxHeight;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/png', quality));
+                    };
+                    img.onerror = (err) => reject(err);
+                    img.src = e.target.result;
+                };
+                reader.onerror = (err) => reject(err);
+                reader.readAsDataURL(file);
+            });
+        };
+
+        const defaultKopSettings = {
+            line1: "KEMENTERIAN AGAMA REPUBLIK INDONESIA",
+            line2: "KANTOR KEMENTERIAN AGAMA KABUPATEN GORONTALO",
+            line3: "MADRASAH TSANAWIYAH NEGERI 2 KABUPATEN GORONTALO",
+            address: "Jl. Ahmad A. Wahab No. 123, Limboto, Kab. Gorontalo",
+            contact: "Email: mtsn2gorontalo@kemenag.go.id | Telp: (0435) 881234",
+            logoLeft: "",
+            logoRight: "",
+            logoSize: 20
+        };
+
+        const initialData = {
+            appSettings: {
+                appTitle: "JELAS",
+                appSubtitle: "JURNAL GURU FASE D",
+                schoolName: "MTs Negeri 2 Kabupaten Gorontalo",
+                greetingPrefix: "Assalamu'alaikum",
+                dashboardGreetingText: "AHLAN WA SAHLAN",
+                welcomeText: "Selamat datang di Dashboard Jurnal Harian & Penilaian Guru. Semoga hari mengajar Anda menyenangkan!",
+                themeColor: "gold",
+                appLogo: "",
+            },
+            kopSettings: defaultKopSettings,
+            teacher: {
+                name: "Sandi Kurnianto Koniyo, S.Pd",
+                nip: "19850101 201001 1 001",
+                username: "sandikurnianto",
+                password: "password123",
+                school: "MTs Negeri 2 Kabupaten Gorontalo",
+                phase: "D",
+                academicYear: "2026/2027",
+                photo: "https://placehold.co/150x150/c59535/ffffff?text=SK",
+                headmasterName: "Drs. H. Abd. Rahman, M.Pd",
+                headmasterNip: "19710515 199703 1 002"
+            },
+            classes: [
+                { id: 'c1', name: 'VII-A' },
+                { id: 'c2', name: 'VII-B' },
+                { id: 'c3', name: 'VII-C' },
+                { id: 'c4', name: 'VII-D' },
+                { id: 'c5', name: 'VII-E' },
+                { id: 'c6', name: 'VII-F' },
+                { id: 'c7', name: 'VII-G' },
+            ],
+            subjects: [
+                "Bahasa Indonesia", "Matematika", "IPA", "IPS", "Bahasa Inggris", 
+                "Pendidikan Agama Islam", "Al-Qur'an Hadits", "Akidah Akhlak", "Fikih", 
+                "Sejarah Kebudayaan Islam (SKI)", "Bahasa Arab", "Informatika", "PJOK", "Pancasila / PPKn"
+            ],
+            students: [],
+            journals: [
+                {
+                    id: 'j_sample1',
+                    date: new Date().toISOString().split('T')[0],
+                    classId: 'c1',
+                    className: 'VII-A',
+                    subject: 'Bahasa Indonesia',
+                    jamKe: 'Jam Ke 1 - 2 (07:30 - 09:00)',
+                    material: 'Menelaah Teks Deskripsi',
+                    activities: 'Siswa membaca contoh teks deskripsi dan mengidentifikasi struktur isi teks.',
+                    notes: 'Seluruh siswa aktif berkontribusi.'
+                }
+            ],
+            attendance: [],
+            gradeCategories: [
+                { id: 'cat_f1', name: 'Formatif 1', type: 'Formatif' },
+                { id: 'cat_f2', name: 'Formatif 2', type: 'Formatif' },
+                { id: 'cat_s1', name: 'Sumatif 1 (LM)', type: 'Sumatif' },
+                { id: 'cat_s2', name: 'Sumatif 2 (LM)', type: 'Sumatif' },
+                { id: 'cat_pas', name: 'Sumatif PAS / PAT', type: 'PAS' },
+            ],
+            grades: []
+        };
+
+        const generateStudents = () => {
+            let students = [];
+            let idCounter = 1;
+            initialData.classes.forEach(cls => {
+                for(let i = 1; i <= 6; i++) {
+                    students.push({
+                        id: `s_${idCounter}`,
+                        nis: `2026${String(idCounter).padStart(3, '0')}`,
+                        name: `Siswa ${cls.name} #${i}`,
+                        gender: i % 2 === 0 ? 'L' : 'P',
+                        classId: cls.id,
+                        className: cls.name
+                    });
+                    idCounter++;
+                }
+            });
+            return students;
+        };
+        initialData.students = generateStudents();
+
+        const DB = {
+            init: () => {
+                if (!localStorage.getItem('jelas_data_v6')) {
+                    localStorage.setItem('jelas_data_v6', JSON.stringify(initialData));
+                }
+            },
+            get: () => {
+                try {
+                    const raw = localStorage.getItem('jelas_data_v6');
+                    const data = raw ? JSON.parse(raw) : initialData;
+                    if (!data.subjects) data.subjects = initialData.subjects;
+                    if (!data.attendance) data.attendance = [];
+                    if (!data.classes) data.classes = initialData.classes;
+                    if (!data.kopSettings) data.kopSettings = initialData.kopSettings;
+                    if (!data.teacher) data.teacher = initialData.teacher;
+                    if (!data.appSettings) data.appSettings = initialData.appSettings;
+                    if (!data.gradeCategories) data.gradeCategories = initialData.gradeCategories;
+                    if (!data.grades) data.grades = [];
+                    return data;
+                } catch(e) {
+                    console.error("DB parse error", e);
+                    return initialData;
+                }
+            },
+            set: (data) => {
+                try {
+                    localStorage.setItem('jelas_data_v6', JSON.stringify(data));
+                } catch(err) {
+                    console.error("LocalStorage save error", err);
+                    alert("Gagal menyimpan data ke browser storage! Ukuran file mungkin terlalu besar.");
+                }
+            },
+            
+            saveJournal: (journal) => {
+                const data = DB.get();
+                if (journal.id) {
+                    const idx = data.journals.findIndex(j => j.id === journal.id);
+                    if (idx !== -1) data.journals[idx] = journal;
+                } else {
+                    journal.id = 'j_' + Date.now();
+                    data.journals.unshift(journal);
+                }
+                DB.set(data);
+            },
+            deleteJournal: (id) => {
+                const data = DB.get();
+                data.journals = data.journals.filter(j => j.id !== id);
+                DB.set(data);
+            },
+
+            saveClass: (cls) => {
+                const data = DB.get();
+                if (cls.id) {
+                    const idx = data.classes.findIndex(c => c.id === cls.id);
+                    if (idx !== -1) {
+                        data.classes[idx] = cls;
+                        data.students.forEach(s => {
+                            if (s.classId === cls.id) s.className = cls.name;
+                        });
+                    }
+                } else {
+                    cls.id = 'c_' + Date.now();
+                    data.classes.push(cls);
+                }
+                DB.set(data);
+            },
+            deleteClass: (id) => {
+                const data = DB.get();
+                data.classes = data.classes.filter(c => c.id !== id);
+                data.students = data.students.filter(s => s.classId !== id);
+                DB.set(data);
+            },
+            
+            saveStudent: (student) => {
+                const data = DB.get();
+                if (student.id) {
+                    const idx = data.students.findIndex(s => s.id === student.id);
+                    if (idx !== -1) data.students[idx] = student;
+                } else {
+                    student.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                    data.students.push(student);
+                }
+                DB.set(data);
+            },
+            batchImportStudents: (newStudentsList, replaceClassId = null) => {
+                const data = DB.get();
+                if (replaceClassId) {
+                    data.students = data.students.filter(s => s.classId !== replaceClassId);
+                }
+                newStudentsList.forEach(st => {
+                    if (!st.id) st.id = 's_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    data.students.push(st);
+                });
+                DB.set(data);
+            },
+            deleteStudent: (id) => {
+                const data = DB.get();
+                data.students = data.students.filter(s => s.id !== id);
+                DB.set(data);
+            },
+
+            saveAttendance: (date, classId, subject, records) => {
+                const data = DB.get();
+                const existingIdx = data.attendance.findIndex(a => a.date === date && a.classId === classId && (a.subject === subject || (!a.subject && !subject)));
+                if (existingIdx !== -1) {
+                    data.attendance[existingIdx].records = records;
+                    data.attendance[existingIdx].subject = subject;
+                } else {
+                    data.attendance.push({
+                        id: 'att_' + Date.now(),
+                        date,
+                        classId,
+                        subject: subject || '',
+                        records
+                    });
+                }
+                DB.set(data);
+            },
+
+            saveGradeCategory: (cat) => {
+                const data = DB.get();
+                if (cat.id) {
+                    const idx = data.gradeCategories.findIndex(c => c.id === cat.id);
+                    if (idx !== -1) data.gradeCategories[idx] = cat;
+                } else {
+                    cat.id = 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+                    data.gradeCategories.push(cat);
+                }
+                DB.set(data);
+            },
+            deleteGradeCategory: (catId) => {
+                const data = DB.get();
+                data.gradeCategories = data.gradeCategories.filter(c => c.id !== catId);
+                data.grades.forEach(g => {
+                    Object.keys(g.records || {}).forEach(stId => {
+                        if (g.records[stId] && g.records[stId][catId] !== undefined) {
+                            delete g.records[stId][catId];
+                        }
+                    });
+                });
+                DB.set(data);
+            },
+            saveStudentGrades: (classId, subject, records) => {
+                const data = DB.get();
+                const idx = data.grades.findIndex(g => g.classId === classId && g.subject === subject);
+                if (idx !== -1) {
+                    data.grades[idx].records = records;
+                } else {
+                    data.grades.push({
+                        id: 'grd_' + Date.now(),
+                        classId,
+                        subject,
+                        records
+                    });
+                }
+                DB.set(data);
+            },
+
+            saveSubject: (subjectName) => {
+                const data = DB.get();
+                if (!data.subjects.includes(subjectName)) {
+                    data.subjects.push(subjectName);
+                    DB.set(data);
+                }
+            },
+            deleteSubject: (subjectName) => {
+                const data = DB.get();
+                data.subjects = data.subjects.filter(s => s !== subjectName);
+                DB.set(data);
+            },
+
+            saveAppSettings: (settings) => {
+                const data = DB.get();
+                data.appSettings = { ...data.appSettings, ...settings };
+                DB.set(data);
+            },
+            saveKopSettings: (kop) => {
+                const data = DB.get();
+                data.kopSettings = { ...data.kopSettings, ...kop };
+                DB.set(data);
+            },
+            saveTeacher: (teacherData) => {
+                const data = DB.get();
+                data.teacher = { ...data.teacher, ...teacherData };
+                DB.set(data);
+            }
+        };
+        DB.init();
+
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '';
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('id-ID', options);
+        };
+
+        const AppContext = createContext();
+
+        const AppProvider = ({ children }) => {
+            const [data, setData] = useState(() => DB.get());
+            const [user, setUser] = useState({ name: data.teacher?.name || 'Guru' });
+            const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [toast, setToast] = useState(null);
+            const [confirmModal, setConfirmModal] = useState(null);
+
+            useEffect(() => {
+                document.documentElement.className = theme;
+                localStorage.setItem('theme', theme);
+            }, [theme]);
+
+            useEffect(() => {
+                const activeColor = data.appSettings?.themeColor || 'gold';
+                document.documentElement.setAttribute('data-theme-color', activeColor);
+            }, [data.appSettings?.themeColor]);
+
+            const refreshData = () => setData(DB.get());
+
+            const showToast = (message, type = 'success') => {
+                setToast({ message, type });
+                setTimeout(() => setToast(null), 3500);
+            };
+
+            const askConfirm = ({ title, message, onConfirm }) => {
+                setConfirmModal({ title, message, onConfirm });
+            };
+
+            const closeConfirm = () => setConfirmModal(null);
+            const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+
+            return (
+                <AppContext.Provider value={{ 
+                    data, refreshData, 
+                    user, setUser, 
+                    theme, toggleTheme,
+                    currentView, setCurrentView,
+                    showToast, askConfirm
+                }}>
+                    {children}
+                    
+                    {toast && (
+                        <div className={`fixed bottom-5 right-5 px-6 py-3.5 rounded-xl shadow-xl text-white font-medium z-50 animate-fade-in flex items-center gap-3 ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>
+                            <i className={`ph-fill ${toast.type === 'success' ? 'ph-check-circle' : 'ph-warning-circle'} text-2xl`}></i>
+                            <span>{toast.message}</span>
+                        </div>
+                    )}
+
+                    {confirmModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-darkcard rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+                                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center mb-4">
+                                    <i className="ph ph-warning-diamond text-2xl"></i>
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">{confirmModal.title || 'Konfirmasi'}</h3>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6">{confirmModal.message}</p>
+                                <div className="flex gap-3 justify-end">
+                                    <button 
+                                        type="button" 
+                                        onClick={closeConfirm}
+                                        className="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium text-sm"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            confirmModal.onConfirm();
+                                            closeConfirm();
+                                        }}
+                                        className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-sm shadow-md"
+                                    >
+                                        Ya, Lanjutkan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </AppContext.Provider>
+            );
+        };
+
+        const Card = ({ children, className = "", onClick }) => (
+            <div onClick={onClick} className={`bg-white dark:bg-darkcard rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 ${className}`}>
+                {children}
+            </div>
+        );
+
+        const Button = ({ children, variant = 'primary', icon, onClick, className = "", type="button" }) => {
+            const baseStyle = "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-darker text-sm";
+            const variants = {
+                primary: "bg-gold-500 hover:bg-gold-600 text-white shadow-md shadow-gold-500/20 focus:ring-gold-500",
+                secondary: "bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 focus:ring-slate-500",
+                danger: "bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 focus:ring-red-500",
+                emerald: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md focus:ring-emerald-500",
+                ghost: "hover:bg-slate-100 text-slate-600 dark:hover:bg-slate-800 dark:text-slate-300"
+            };
+            return (
+                <button type={type} onClick={onClick} className={`${baseStyle} ${variants[variant]} ${className}`}>
+                    {icon && <i className={`ph ${icon} text-lg`}></i>}
+                    {children}
+                </button>
+            );
+        };
+
+        const Input = ({ label, type = "text", ...props }) => (
+            <div className="mb-4">
+                {label && <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>}
+                <input 
+                    type={type} 
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-slate-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-colors outline-none text-sm"
+                    {...props}
+                />
+            </div>
+        );
+
+        const Select = ({ label, options, ...props }) => (
+            <div className="mb-4">
+                {label && <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</label>}
+                <select 
+                    className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-slate-900 dark:text-white focus:ring-2 focus:ring-gold-500 focus:border-transparent transition-colors outline-none text-sm"
+                    {...props}
+                >
+                    <option value="">-- Pilih --</option>
+                    {options.map((opt, i) => (
+                        <option key={i} value={opt.value !== undefined ? opt.value : opt}>
+                            {opt.label !== undefined ? opt.label : opt}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        );
+
+        const Sidebar = ({ isOpen, setIsOpen }) => {
+            const { currentView, setCurrentView, data } = useContext(AppContext);
+
+            const menus = [
+                { title: 'DASHBOARD', items: [{ id: 'dashboard', label: 'Dashboard', icon: 'ph-squares-four' }] },
+                { title: 'AKADEMIK & SISWA', items: [
+                    { id: 'siswa', label: 'Data Siswa & Import Excel', icon: 'ph-users' },
+                    { id: 'kelas', label: 'Data Kelas', icon: 'ph-blackboard' },
+                    { id: 'presensi', label: 'Presensi Murid & Rekap', icon: 'ph-checks' },
+                    { id: 'nilai', label: 'Daftar Nilai Murid', icon: 'ph-chart-bar' },
+                    { id: 'matpel', label: 'Kelola Mata Pelajaran', icon: 'ph-book-bookmark' },
+                ]},
+                { title: 'JURNAL HARIAN', items: [
+                    { id: 'jurnal_list', label: 'Semua Jurnal', icon: 'ph-book-open-text' },
+                    { id: 'jurnal_form', label: 'Tambah Jurnal', icon: 'ph-plus-circle' },
+                    { id: 'jurnal_export', label: 'Export & Rekap PDF', icon: 'ph-printer' },
+                ]},
+                { title: 'PENGATURAN', items: [
+                    { id: 'app_settings', label: 'Pengaturan & Kop Logo', icon: 'ph-gear' },
+                    { id: 'account_security', label: 'Akun & Keamanan', icon: 'ph-shield-check' },
+                ]}
+            ];
+
+            const navItemClass = (id) => `flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-colors mb-1 ${currentView === id ? 'bg-gold-500 text-white shadow-md shadow-gold-500/20 font-semibold' : 'text-slate-600 hover:bg-gold-50 dark:text-slate-400 dark:hover:bg-slate-800 hover:text-gold-600 dark:hover:text-gold-400'}`;
+
+            return (
+                <>
+                    {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsOpen(false)}></div>}
+                    
+                    <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-darkcard border-r border-slate-200 dark:border-slate-800 transform transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <div className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-darkcard z-10">
+                            <div className="flex items-center gap-3">
+                                {data.appSettings?.appLogo ? (
+                                    <img src={data.appSettings.appLogo} alt="Logo Web App" className="w-10 h-10 rounded-xl object-contain bg-white p-1 border shadow-sm" />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-gold-500/30">
+                                        {data.appSettings?.appTitle?.charAt(0) || 'J'}
+                                    </div>
+                                )}
+                                <div>
+                                    <h1 className="font-display font-bold text-xl tracking-tight text-slate-800 dark:text-white">{data.appSettings?.appTitle || 'JELAS'}</h1>
+                                    <p className="text-[10px] text-slate-500 font-medium tracking-wide">{data.appSettings?.appSubtitle || 'JURNAL GURU FASE D'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-4">
+                            {menus.map((section, idx) => (
+                                <div key={idx} className="mb-5">
+                                    <p className="px-4 text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-2 uppercase tracking-wider">{section.title}</p>
+                                    {section.items.map(item => (
+                                        <div 
+                                            key={item.id} 
+                                            className={navItemClass(item.id)}
+                                            onClick={() => { setCurrentView(item.id); setIsOpen(false); }}
+                                        >
+                                            <i className={`ph ${item.icon} text-xl ${currentView === item.id ? '' : 'text-slate-400'}`}></i>
+                                            <span className="text-sm">{item.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </aside>
+                </>
+            );
+        };
+
+        const Header = ({ toggleSidebar }) => {
+            const { data, theme, toggleTheme } = useContext(AppContext);
+            const today = formatDate(new Date().toISOString());
+            const displayLogo = data.appSettings?.appLogo || data.teacher.photo;
+
+            return (
+                <header className="sticky top-0 z-30 bg-white/80 dark:bg-darkcard/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 h-16 flex items-center justify-between px-4 lg:px-8">
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <button onClick={toggleSidebar} className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                            <i className="ph ph-list text-2xl"></i>
+                        </button>
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-slate-600 dark:text-slate-300 font-medium">
+                            <i className="ph ph-calendar-blank text-gold-500 text-base"></i>
+                            <span className="truncate">{today}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 md:gap-4">
+                        <button onClick={toggleTheme} className="p-2 rounded-full text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors">
+                            <i className={`ph ${theme === 'dark' ? 'ph-sun text-yellow-400' : 'ph-moon'} text-xl`}></i>
+                        </button>
+                        
+                        <div className="flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-slate-700">
+                            <div className="hidden sm:block text-right">
+                                <p className="text-xs md:text-sm font-semibold text-slate-800 dark:text-white leading-tight">{data.teacher.name.split(',')[0]}</p>
+                                <p className="text-[11px] text-slate-500">Guru Phase {data.teacher.phase}</p>
+                            </div>
+                            <img src={displayLogo} alt="Profile / App Logo" className="w-8 h-8 rounded-full object-cover border-2 border-gold-400" />
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        const ViewDashboard = () => {
+            const { data, setCurrentView } = useContext(AppContext);
+            
+            const stats = [
+                { label: 'Total Siswa Terdaftar', value: data.students.length, icon: 'ph-users-three', color: 'bg-emerald-500', link: 'siswa' },
+                { label: 'Kelas Aktif', value: data.classes.length, icon: 'ph-chalkboard-teacher', color: 'bg-blue-500', link: 'kelas' },
+                { label: 'Total Jurnal Terisi', value: data.journals.length, icon: 'ph-books', color: 'bg-gold-500', link: 'jurnal_list' },
+                { label: 'Daftar Nilai Input', value: data.grades.length, icon: 'ph-chart-bar', color: 'bg-indigo-500', link: 'nilai' },
+            ];
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="bg-gradient-to-r from-gold-600 to-gold-400 rounded-2xl p-6 md:p-8 text-white shadow-xl shadow-gold-500/20 relative overflow-hidden">
+                        <div className="relative z-10 max-w-2xl">
+                            <h2 className="text-2xl md:text-3xl font-display font-bold mb-2">
+                                {data.appSettings?.greetingPrefix}, {data.appSettings?.dashboardGreetingText} 👋
+                            </h2>
+                            <p className="text-gold-50 text-sm md:text-base opacity-90">{data.appSettings?.welcomeText}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        {stats.map((stat, idx) => (
+                            <Card key={idx} className="flex items-center gap-4 hover:-translate-y-1 transition-transform cursor-pointer" onClick={() => setCurrentView(stat.link)}>
+                                <div className={`w-12 h-12 rounded-2xl ${stat.color} text-white flex items-center justify-center flex-shrink-0 shadow-md`}>
+                                    <i className={`ph ${stat.icon} text-2xl`}></i>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{stat.label}</p>
+                                    <h3 className="text-xl font-bold text-slate-800 dark:text-white">{stat.value}</h3>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <Card className="border-l-4 border-l-gold-500">
+                            <div className="flex flex-col justify-between h-full">
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i className="ph ph-plus-circle text-gold-500 text-2xl"></i>
+                                        Isi Jurnal Mengajar Hari Ini
+                                    </h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                                        Lakukan pencatatan jurnal harian mengajar beserta jam pelajaran dan materi KBM.
+                                    </p>
+                                </div>
+                                <div className="mt-4">
+                                    <Button variant="primary" icon="ph-pencil-line" onClick={() => setCurrentView('jurnal_form')}>
+                                        Tambah Jurnal Harian
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="border-l-4 border-l-emerald-500">
+                            <div className="flex flex-col justify-between h-full">
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i className="ph ph-checks text-emerald-600 text-2xl"></i>
+                                        Presensi Murid & Rekap
+                                    </h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                                        Isi status kehadiran siswa per mata pelajaran serta unduh rekap harian atau bulanan.
+                                    </p>
+                                </div>
+                                <div className="mt-4">
+                                    <Button variant="emerald" icon="ph-user-check" onClick={() => setCurrentView('presensi')}>
+                                        Buka Presensi
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="border-l-4 border-l-indigo-500">
+                            <div className="flex flex-col justify-between h-full">
+                                <div>
+                                    <h3 className="font-bold text-lg text-slate-800 dark:text-white flex items-center gap-2 mb-2">
+                                        <i className="ph ph-chart-bar text-indigo-600 text-2xl"></i>
+                                        Daftar Nilai Murid
+                                    </h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                                        Input nilai Formatif, Sumatif PAS, tambah/kurang komponen nilai, serta export Excel/PDF.
+                                    </p>
+                                </div>
+                                <div className="mt-4">
+                                    <Button variant="secondary" icon="ph-exam" onClick={() => setCurrentView('nilai')}>
+                                        Kelola Daftar Nilai
+                                    </Button>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
+            );
+        };
+
+        const ViewSiswa = () => {
+            const { data, refreshData, showToast, askConfirm } = useContext(AppContext);
+            const [selectedClassFilter, setSelectedClassFilter] = useState('ALL');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [showAddModal, setShowAddModal] = useState(false);
+            const [showImportModal, setShowImportModal] = useState(false);
+            
+            const [importPreview, setImportPreview] = useState([]);
+            const [importClassOption, setImportClassOption] = useState('AUTO');
+            const [overwriteOption, setOverwriteOption] = useState(false);
+            const fileInputRef = useRef(null);
+
+            const [studentForm, setStudentForm] = useState({
+                id: '',
+                nis: '',
+                name: '',
+                gender: 'L',
+                classId: data.classes[0]?.id || 'c1'
+            });
+
+            const filteredStudents = useMemo(() => {
+                return data.students.filter(s => {
+                    const matchClass = selectedClassFilter === 'ALL' || s.classId === selectedClassFilter;
+                    const matchSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                        s.nis.toLowerCase().includes(searchTerm.toLowerCase());
+                    return matchClass && matchSearch;
+                });
+            }, [data.students, selectedClassFilter, searchTerm]);
+
+            const handleSaveStudent = (e) => {
+                e.preventDefault();
+                if (!studentForm.name || !studentForm.nis) {
+                    showToast("Harap isi NIS dan Nama Siswa!", "error");
+                    return;
+                }
+                const targetClass = data.classes.find(c => c.id === studentForm.classId);
+                const payload = {
+                    ...studentForm,
+                    className: targetClass ? targetClass.name : 'VII-A'
+                };
+                DB.saveStudent(payload);
+                refreshData();
+                setShowAddModal(false);
+                showToast("Data siswa berhasil disimpan!");
+            };
+
+            const handleDeleteStudent = (id, name) => {
+                askConfirm({
+                    title: "Hapus Data Siswa",
+                    message: `Apakah Anda yakin ingin menghapus data siswa "${name}"?`,
+                    onConfirm: () => {
+                        DB.deleteStudent(id);
+                        refreshData();
+                        showToast("Data siswa berhasil dihapus.");
+                    }
+                });
+            };
+
+            const handleExcelFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const buffer = evt.target.result;
+                        const workbook = XLSX.read(buffer, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                        if (!jsonRows || jsonRows.length === 0) {
+                            showToast("File Excel kosong atau format tidak terbaca!", "error");
+                            return;
+                        }
+
+                        const parsed = jsonRows.map((row, idx) => {
+                            const getVal = (possibleKeys) => {
+                                for (let k of possibleKeys) {
+                                    const foundKey = Object.keys(row).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                                    if (foundKey && row[foundKey] !== undefined) return String(row[foundKey]).trim();
+                                }
+                                return "";
+                            };
+
+                            const nis = getVal(['nis', 'nisn', 'no induk', 'nomor induk', 'nis/nisn', 'id']);
+                            const name = getVal(['nama', 'nama siswa', 'nama lengkap', 'siswa']);
+                            const jkRaw = getVal(['jenis kelamin', 'jk', 'gender', 'l/p']);
+                            const className = getVal(['kelas', 'class', 'rombel', 'nama kelas']);
+
+                            let gender = 'L';
+                            if (jkRaw.toUpperCase().startsWith('P') || jkRaw.toLowerCase().includes('perempuan')) {
+                                gender = 'P';
+                            }
+
+                            return {
+                                id: 'imp_' + Date.now() + '_' + idx,
+                                nis: nis || `2026${String(idx + 1).padStart(3, '0')}`,
+                                name: name || `Siswa ${idx + 1}`,
+                                gender: gender,
+                                className: className || (selectedClassFilter !== 'ALL' ? data.classes.find(c => c.id === selectedClassFilter)?.name : 'VII-A'),
+                                rawClassName: className
+                            };
+                        }).filter(item => item.name && item.name.length > 0);
+
+                        setImportPreview(parsed);
+                        setShowImportModal(true);
+                    } catch (err) {
+                        showToast("Gagal membaca file Excel. Pastikan format file valid.", "error");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+                e.target.value = null;
+            };
+
+            const handleConfirmImport = () => {
+                if (importPreview.length === 0) return;
+
+                const finalStudents = importPreview.map(st => {
+                    let targetClassId = selectedClassFilter !== 'ALL' ? selectedClassFilter : data.classes[0]?.id;
+                    let targetClassName = data.classes.find(c => c.id === targetClassId)?.name || 'VII-A';
+
+                    if (importClassOption === 'AUTO' && st.rawClassName) {
+                        const matchedClass = data.classes.find(c => c.name.toLowerCase().trim() === st.rawClassName.toLowerCase().trim());
+                        if (matchedClass) {
+                            targetClassId = matchedClass.id;
+                            targetClassName = matchedClass.name;
+                        }
+                    } else if (importClassOption !== 'AUTO') {
+                        targetClassId = importClassOption;
+                        targetClassName = data.classes.find(c => c.id === importClassOption)?.name || 'VII-A';
+                    }
+
+                    return {
+                        id: st.id,
+                        nis: st.nis,
+                        name: st.name,
+                        gender: st.gender,
+                        classId: targetClassId,
+                        className: targetClassName
+                    };
+                });
+
+                const replaceClass = overwriteOption ? (importClassOption !== 'AUTO' ? importClassOption : (selectedClassFilter !== 'ALL' ? selectedClassFilter : null)) : null;
+
+                DB.batchImportStudents(finalStudents, replaceClass);
+                refreshData();
+                setShowImportModal(false);
+                setImportPreview([]);
+                showToast(`Berhasil mengimpor ${finalStudents.length} data siswa dari Excel!`);
+            };
+
+            const downloadTemplateExcel = () => {
+                const templateData = [
+                    { "NIS": "2026001", "Nama Siswa": "Ahmad Dani", "Jenis Kelamin": "L", "Kelas": "VII-A" },
+                    { "NIS": "2026002", "Nama Siswa": "Siti Aminah", "Jenis Kelamin": "P", "Kelas": "VII-A" },
+                ];
+                const worksheet = XLSX.utils.json_to_sheet(templateData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
+                XLSX.writeFile(workbook, "Template_Import_Siswa_JELAS.xlsx");
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-users text-gold-500"></i>
+                                Data Siswa & Import Excel
+                            </h2>
+                            <p className="text-sm text-slate-500">Kelola siswa, impor data Excel, atau unduh template format.</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <input type="file" ref={fileInputRef} onChange={handleExcelFileUpload} accept=".xlsx, .xls, .csv" className="hidden" />
+                            <Button variant="emerald" icon="ph-file-xls" onClick={() => fileInputRef.current.click()}>Import Excel</Button>
+                            <Button variant="secondary" icon="ph-download-simple" onClick={downloadTemplateExcel}>Unduh Template</Button>
+                            <Button variant="primary" icon="ph-plus" onClick={() => { setStudentForm({ id: '', nis: '', name: '', gender: 'L', classId: data.classes[0]?.id }); setShowAddModal(true); }}>Manual</Button>
+                        </div>
+                    </div>
+
+                    <Card className="!p-4">
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                                <select 
+                                    value={selectedClassFilter} 
+                                    onChange={e => setSelectedClassFilter(e.target.value)}
+                                    className="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                >
+                                    <option value="ALL">-- Semua Kelas --</option>
+                                    {data.classes.map(c => (<option key={c.id} value={c.id}>Kelas {c.name}</option>))}
+                                </select>
+
+                                <input 
+                                    type="text" 
+                                    placeholder="Cari NIS atau Nama..." 
+                                    value={searchTerm} 
+                                    onChange={e => setSearchTerm(e.target.value)}
+                                    className="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm outline-none"
+                                />
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="!p-0 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 text-xs font-semibold uppercase border-b border-slate-200 dark:border-slate-800">
+                                        <th className="py-3 px-4">No</th>
+                                        <th className="py-3 px-4">NIS</th>
+                                        <th className="py-3 px-4">Nama Siswa</th>
+                                        <th className="py-3 px-4">L/P</th>
+                                        <th className="py-3 px-4">Kelas</th>
+                                        <th className="py-3 px-4 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {filteredStudents.length > 0 ? (
+                                        filteredStudents.map((s, idx) => (
+                                            <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                <td className="py-3 px-4 text-slate-400">{idx + 1}</td>
+                                                <td className="py-3 px-4 font-mono">{s.nis}</td>
+                                                <td className="py-3 px-4 font-semibold text-slate-800 dark:text-white">{s.name}</td>
+                                                <td className="py-3 px-4">
+                                                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${s.gender === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>{s.gender}</span>
+                                                </td>
+                                                <td className="py-3 px-4">{s.className}</td>
+                                                <td className="py-3 px-4 text-right">
+                                                    <button onClick={() => { setStudentForm(s); setShowAddModal(true); }} className="p-1 text-slate-500 hover:text-gold-600"><i className="ph ph-pencil-simple text-lg"></i></button>
+                                                    <button onClick={() => handleDeleteStudent(s.id, s.name)} className="p-1 text-slate-500 hover:text-red-600"><i className="ph ph-trash text-lg"></i></button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr><td colSpan="6" className="py-8 text-center text-slate-400">Belum ada data siswa.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+
+                    {showImportModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-darkcard rounded-2xl p-6 max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] flex flex-col">
+                                <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">Pratinjau Impor Excel ({importPreview.length} Siswa)</h3>
+                                <div className="overflow-y-auto flex-1 border rounded-xl mb-4 p-2">
+                                    <table className="w-full text-xs">
+                                        <thead>
+                                            <tr className="bg-slate-100 dark:bg-slate-800"><th className="p-2">NIS</th><th className="p-2">Nama</th><th className="p-2">L/P</th><th className="p-2">Kelas</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {importPreview.map((st, i) => (
+                                                <tr key={i} className="border-b"><td className="p-2 font-mono">{st.nis}</td><td className="p-2 font-medium">{st.name}</td><td className="p-2">{st.gender}</td><td className="p-2">{st.rawClassName || st.className}</td></tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="flex justify-end gap-3">
+                                    <Button variant="ghost" onClick={() => setShowImportModal(false)}>Batal</Button>
+                                    <Button variant="emerald" icon="ph-check-circle" onClick={handleConfirmImport}>Proses Simpan</Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showAddModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-darkcard rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+                                <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">{studentForm.id ? 'Edit Siswa' : 'Tambah Siswa Manual'}</h3>
+                                <form onSubmit={handleSaveStudent} className="space-y-3">
+                                    <Input label="NIS" value={studentForm.nis} onChange={e => setStudentForm({...studentForm, nis: e.target.value})} required />
+                                    <Input label="Nama Siswa" value={studentForm.name} onChange={e => setStudentForm({...studentForm, name: e.target.value})} required />
+                                    <Select label="Jenis Kelamin" value={studentForm.gender} onChange={e => setStudentForm({...studentForm, gender: e.target.value})} options={[{value:'L', label:'Laki-Laki'}, {value:'P', label:'Perempuan'}]} />
+                                    <Select label="Kelas" value={studentForm.classId} onChange={e => setStudentForm({...studentForm, classId: e.target.value})} options={data.classes.map(c => ({ value: c.id, label: `Kelas ${c.name}` }))} />
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <Button variant="ghost" onClick={() => setShowAddModal(false)}>Batal</Button>
+                                        <Button type="submit">Simpan</Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ViewKelas = () => {
+            const { data, refreshData, showToast, askConfirm } = useContext(AppContext);
+            const [showClassModal, setShowClassModal] = useState(false);
+            const [classForm, setClassForm] = useState({ id: '', name: '' });
+
+            const handleSaveClass = (e) => {
+                e.preventDefault();
+                if (!classForm.name.trim()) {
+                    showToast("Nama kelas tidak boleh kosong!", "error");
+                    return;
+                }
+                DB.saveClass({
+                    id: classForm.id,
+                    name: classForm.name.trim()
+                });
+                refreshData();
+                setShowClassModal(false);
+                setClassForm({ id: '', name: '' });
+                showToast("Data kelas berhasil disimpan!");
+            };
+
+            const handleDeleteClass = (cls) => {
+                const count = data.students.filter(s => s.classId === cls.id).length;
+                askConfirm({
+                    title: "Hapus Kelas",
+                    message: `Yakin ingin menghapus kelas "${cls.name}"? ${count > 0 ? `(${count} siswa di kelas ini juga akan terhapus)` : ''}`,
+                    onConfirm: () => {
+                        DB.deleteClass(cls.id);
+                        refreshData();
+                        showToast("Kelas berhasil dihapus.");
+                    }
+                });
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-blackboard text-gold-500"></i>
+                                Data Kelas Rombel
+                            </h2>
+                            <p className="text-sm text-slate-500">Guru dapat menambahkan, merubah, atau mengelola kelas secara mandiri.</p>
+                        </div>
+                        <Button variant="primary" icon="ph-plus" onClick={() => { setClassForm({ id: '', name: '' }); setShowClassModal(true); }}>
+                            Tambah Kelas Baru
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        {data.classes.map(c => {
+                            const count = data.students.filter(s => s.classId === c.id).length;
+                            return (
+                                <Card key={c.id} className="relative overflow-hidden hover:border-gold-500 transition-all flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-2xl font-black font-display text-gold-600">{c.name}</span>
+                                            <i className="ph ph-chalkboard-teacher text-2xl text-gold-500"></i>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mb-4">Jumlah Siswa: <span className="font-bold text-slate-800 dark:text-white">{count} Siswa</span></p>
+                                    </div>
+                                    <div className="flex justify-end gap-2 border-t pt-3 border-slate-100 dark:border-slate-800">
+                                        <button onClick={() => { setClassForm(c); setShowClassModal(true); }} className="p-1.5 text-slate-500 hover:text-gold-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                            <i className="ph ph-pencil-simple text-lg"></i>
+                                        </button>
+                                        <button onClick={() => handleDeleteClass(c)} className="p-1.5 text-slate-500 hover:text-red-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+                                            <i className="ph ph-trash text-lg"></i>
+                                        </button>
+                                    </div>
+                                </Card>
+                            );
+                        })}
+                    </div>
+
+                    {showClassModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-darkcard rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+                                <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">{classForm.id ? 'Edit Kelas' : 'Tambah Kelas Baru'}</h3>
+                                <form onSubmit={handleSaveClass} className="space-y-4">
+                                    <Input 
+                                        label="Nama Kelas / Rombel" 
+                                        placeholder="Contoh: VII-H / VIII-A / IX-1" 
+                                        value={classForm.name} 
+                                        onChange={e => setClassForm({ ...classForm, name: e.target.value })} 
+                                        required 
+                                    />
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <Button variant="ghost" onClick={() => setShowClassModal(false)}>Batal</Button>
+                                        <Button type="submit">Simpan Kelas</Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ViewPresensi = () => {
+            const { data, refreshData, showToast } = useContext(AppContext);
+            const [activeTab, setActiveTab] = useState('input');
+            
+            const [selectedClass, setSelectedClass] = useState(data.classes[0]?.id || '');
+            const [selectedSubject, setSelectedSubject] = useState(data.subjects[0] || '');
+            const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split('T')[0]);
+            const [records, setRecords] = useState({});
+
+            const [rekapClass, setRekapClass] = useState(data.classes[0]?.id || '');
+            const [rekapSubject, setRekapSubject] = useState('ALL');
+            const [rekapMonth, setRekapMonth] = useState(new Date().toISOString().substr(0, 7));
+
+            const classStudents = useMemo(() => {
+                return data.students.filter(s => s.classId === selectedClass);
+            }, [data.students, selectedClass]);
+
+            const rekapClassStudents = useMemo(() => {
+                return data.students.filter(s => s.classId === rekapClass);
+            }, [data.students, rekapClass]);
+
+            useEffect(() => {
+                const found = data.attendance.find(a => 
+                    a.date === attendanceDate && 
+                    a.classId === selectedClass && 
+                    (a.subject === selectedSubject || (!a.subject && !selectedSubject))
+                );
+                if (found) {
+                    setRecords(found.records);
+                } else {
+                    const defaultRec = {};
+                    classStudents.forEach(s => { defaultRec[s.id] = 'H'; });
+                    setRecords(defaultRec);
+                }
+            }, [selectedClass, selectedSubject, attendanceDate, data.attendance, classStudents]);
+
+            const handleStatusChange = (studentId, status) => {
+                setRecords(prev => ({ ...prev, [studentId]: status }));
+            };
+
+            const markAllHadir = () => {
+                const updated = {};
+                classStudents.forEach(s => { updated[s.id] = 'H'; });
+                setRecords(updated);
+                showToast("Seluruh siswa ditandai HADIR.");
+            };
+
+            const handleSaveAttendance = () => {
+                DB.saveAttendance(attendanceDate, selectedClass, selectedSubject, records);
+                refreshData();
+                showToast("Presensi harian siswa berhasil disimpan!");
+            };
+
+            const dailySummary = useMemo(() => {
+                let H = 0, S = 0, I = 0, A = 0;
+                Object.values(records).forEach(status => {
+                    if (status === 'H') H++;
+                    if (status === 'S') S++;
+                    if (status === 'I') I++;
+                    if (status === 'A') A++;
+                });
+                return { H, S, I, A };
+            }, [records]);
+
+            const rekapData = useMemo(() => {
+                const filteredAttendance = data.attendance.filter(a => {
+                    const matchClass = a.classId === rekapClass;
+                    const matchMonth = a.date.startsWith(rekapMonth);
+                    const matchSubject = rekapSubject === 'ALL' || a.subject === rekapSubject;
+                    return matchClass && matchMonth && matchSubject;
+                });
+
+                const totalDays = filteredAttendance.length;
+
+                const result = rekapClassStudents.map(s => {
+                    let H = 0, S = 0, I = 0, A = 0;
+                    filteredAttendance.forEach(att => {
+                        const status = att.records[s.id] || 'H';
+                        if (status === 'H') H++;
+                        if (status === 'S') S++;
+                        if (status === 'I') I++;
+                        if (status === 'A') A++;
+                    });
+                    const pct = totalDays > 0 ? Math.round((H / totalDays) * 100) : 100;
+                    return { ...s, H, S, I, A, totalDays, pct };
+                });
+
+                return { list: result, totalDays };
+            }, [data.attendance, rekapClass, rekapSubject, rekapMonth, rekapClassStudents]);
+
+            const exportRekapExcel = () => {
+                const className = data.classes.find(c => c.id === rekapClass)?.name || '';
+                const excelRows = rekapData.list.map((s, idx) => ({
+                    "No": idx + 1,
+                    "NIS": s.nis,
+                    "Nama Siswa": s.name,
+                    "L/P": s.gender,
+                    "Hadir (H)": s.H,
+                    "Sakit (S)": s.S,
+                    "Izin (I)": s.I,
+                    "Alpa (A)": s.A,
+                    "Persentase Kehadiran (%)": `${s.pct}%`
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(excelRows);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, `Rekap_Presensi_${className}`);
+                XLSX.writeFile(workbook, `Rekap_Presensi_Kelas_${className}_${rekapMonth}.xlsx`);
+                showToast("Rekapitulasi Presensi berhasil diexport ke Excel!");
+            };
+
+            const exportRekapPDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+
+                const kop = data.kopSettings;
+                const teacher = data.teacher;
+                const className = data.classes.find(c => c.id === rekapClass)?.name || '';
+
+                if (kop.logoLeft) {
+                    try { doc.addImage(kop.logoLeft, 'PNG', 12, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+                if (kop.logoRight) {
+                    try { doc.addImage(kop.logoRight, 'PNG', 178, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.text(kop.line1 || "", 105, 15, { align: "center" });
+                doc.setFontSize(12);
+                doc.text(kop.line2 || "", 105, 21, { align: "center" });
+                doc.setFontSize(13);
+                doc.text(kop.line3 || "", 105, 27, { align: "center" });
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.text(kop.address || "", 105, 32, { align: "center" });
+                doc.text(kop.contact || "", 105, 36, { align: "center" });
+
+                doc.setLineWidth(0.8);
+                doc.line(12, 39, 198, 39);
+                doc.setLineWidth(0.2);
+                doc.line(12, 40, 198, 40);
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.text(`REKAPITULASI PRESENSI KEHADIRAN SISWA`, 105, 48, { align: "center" });
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Kelas               : Kelas ${className}`, 12, 56);
+                doc.text(`Mata Pelajaran : ${rekapSubject === 'ALL' ? 'Semua Mata Pelajaran' : rekapSubject}`, 12, 61);
+                doc.text(`Bulan / Tahun  : ${rekapMonth}`, 135, 56);
+                doc.text(`Guru Pengampu : ${teacher.name}`, 135, 61);
+
+                const tableBody = rekapData.list.map((s, i) => [
+                    i + 1,
+                    s.nis,
+                    s.name,
+                    s.gender,
+                    s.H,
+                    s.S,
+                    s.I,
+                    s.A,
+                    `${s.pct}%`
+                ]);
+
+                doc.autoTable({
+                    startY: 67,
+                    head: [['No', 'NIS', 'Nama Siswa', 'L/P', 'H', 'S', 'I', 'A', '% Hadir']],
+                    body: tableBody,
+                    styles: { fontSize: 8, cellPadding: 2.5 },
+                    headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', halign: 'center' },
+                    columnStyles: {
+                        0: { cellWidth: 10, halign: 'center' },
+                        1: { cellWidth: 25, halign: 'center' },
+                        2: { cellWidth: 'auto' },
+                        3: { cellWidth: 12, halign: 'center' },
+                        4: { cellWidth: 12, halign: 'center' },
+                        5: { cellWidth: 12, halign: 'center' },
+                        6: { cellWidth: 12, halign: 'center' },
+                        7: { cellWidth: 12, halign: 'center' },
+                        8: { cellWidth: 20, halign: 'center' }
+                    }
+                });
+
+                const finalY = doc.lastAutoTable.finalY + 15;
+                if (finalY < 250) {
+                    doc.text(`Gorontalo, ${formatDate(new Date().toISOString())}`, 135, finalY);
+                    doc.text("Mengetahui,", 12, finalY + 5);
+                    doc.text("Kepala Madrasah / Sekolah", 12, finalY + 10);
+                    doc.text("Guru Mata Pelajaran / Kelas", 135, finalY + 10);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.headmasterName || "Kepala Sekolah", 12, finalY + 30);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.headmasterNip || '-'}`, 12, finalY + 34);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.name, 135, finalY + 30);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.nip}`, 135, finalY + 34);
+                }
+
+                doc.save(`Rekap_Presensi_Kelas_${className}_${rekapMonth}.pdf`);
+                showToast("Rekapitulasi Presensi PDF berhasil dicetak!");
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-checks text-emerald-600"></i>
+                                Presensi Murid & Rekapitulasi
+                            </h2>
+                            <p className="text-sm text-slate-500">Catat presensi per mata pelajaran serta ekspor rekapitulasi ke Excel & PDF.</p>
+                        </div>
+
+                        <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                            <button 
+                                onClick={() => setActiveTab('input')} 
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'input' ? 'bg-white dark:bg-darkcard text-gold-600 shadow-sm' : 'text-slate-500'}`}
+                            >
+                                <i className="ph ph-pencil-simple mr-1"></i> Input Harian
+                            </button>
+                            <button 
+                                onClick={() => setActiveTab('rekap')} 
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === 'rekap' ? 'bg-white dark:bg-darkcard text-emerald-600 shadow-sm' : 'text-slate-500'}`}
+                            >
+                                <i className="ph ph-chart-bar mr-1"></i> Rekap & Export
+                            </button>
+                        </div>
+                    </div>
+
+                    {activeTab === 'input' ? (
+                        <>
+                            <Card className="!p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tanggal Presensi</label>
+                                        <input 
+                                            type="date" 
+                                            value={attendanceDate} 
+                                            onChange={e => setAttendanceDate(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Kelas</label>
+                                        <select 
+                                            value={selectedClass} 
+                                            onChange={e => setSelectedClass(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        >
+                                            {data.classes.map(c => (
+                                                <option key={c.id} value={c.id}>Kelas {c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Mata Pelajaran</label>
+                                        <select 
+                                            value={selectedSubject} 
+                                            onChange={e => setSelectedSubject(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        >
+                                            {data.subjects.map((subj, idx) => (
+                                                <option key={idx} value={subj}>{subj}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 pt-4 md:pt-0">
+                                        <Button variant="secondary" icon="ph-check-circle" onClick={markAllHadir}>
+                                            Semua Hadir
+                                        </Button>
+                                        <Button variant="emerald" icon="ph-floppy-disk" onClick={handleSaveAttendance}>
+                                            Simpan Presensi
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-center">
+                                    <span className="text-xs uppercase font-bold tracking-wider block">Hadir (H)</span>
+                                    <span className="text-2xl font-black">{dailySummary.H}</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-center">
+                                    <span className="text-xs uppercase font-bold tracking-wider block">Sakit (S)</span>
+                                    <span className="text-2xl font-black">{dailySummary.S}</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-center">
+                                    <span className="text-xs uppercase font-bold tracking-wider block">Izin (I)</span>
+                                    <span className="text-2xl font-black">{dailySummary.I}</span>
+                                </div>
+                                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 text-center">
+                                    <span className="text-xs uppercase font-bold tracking-wider block">Alpa (A)</span>
+                                    <span className="text-2xl font-black">{dailySummary.A}</span>
+                                </div>
+                            </div>
+
+                            <Card className="!p-0 overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse text-sm">
+                                        <thead>
+                                            <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 text-xs font-semibold uppercase border-b border-slate-200 dark:border-slate-800">
+                                                <th className="py-3 px-4">No</th>
+                                                <th className="py-3 px-4">NIS</th>
+                                                <th className="py-3 px-4">Nama Siswa</th>
+                                                <th className="py-3 px-4">L/P</th>
+                                                <th className="py-3 px-4 text-center">Status Kehadiran</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {classStudents.length > 0 ? (
+                                                classStudents.map((s, idx) => {
+                                                    const status = records[s.id] || 'H';
+                                                    return (
+                                                        <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                            <td className="py-3 px-4 text-slate-400">{idx + 1}</td>
+                                                            <td className="py-3 px-4 font-mono">{s.nis}</td>
+                                                            <td className="py-3 px-4 font-semibold text-slate-800 dark:text-white">{s.name}</td>
+                                                            <td className="py-3 px-4">{s.gender}</td>
+                                                            <td className="py-3 px-4">
+                                                                <div className="flex justify-center items-center gap-1 sm:gap-2">
+                                                                    {[
+                                                                        { code: 'H', label: 'Hadir', bg: 'bg-emerald-500 text-white' },
+                                                                        { code: 'S', label: 'Sakit', bg: 'bg-blue-500 text-white' },
+                                                                        { code: 'I', label: 'Izin', bg: 'bg-amber-500 text-white' },
+                                                                        { code: 'A', label: 'Alpa', bg: 'bg-red-500 text-white' },
+                                                                    ].map(item => (
+                                                                        <button
+                                                                            key={item.code}
+                                                                            type="button"
+                                                                            onClick={() => handleStatusChange(s.id, item.code)}
+                                                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                                                                                status === item.code 
+                                                                                    ? `${item.bg} shadow-md scale-105` 
+                                                                                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                                                                            }`}
+                                                                        >
+                                                                            {item.code}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="5" className="py-8 text-center text-slate-400">
+                                                        Tidak ada data siswa untuk kelas ini. Silakan kelola di menu <b>Data Siswa</b>.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </>
+                    ) : (
+                        <>
+                            <Card className="!p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Bulan & Tahun</label>
+                                        <input 
+                                            type="month" 
+                                            value={rekapMonth} 
+                                            onChange={e => setRekapMonth(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Kelas</label>
+                                        <select 
+                                            value={rekapClass} 
+                                            onChange={e => setRekapClass(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        >
+                                            {data.classes.map(c => (
+                                                <option key={c.id} value={c.id}>Kelas {c.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Mata Pelajaran</label>
+                                        <select 
+                                            value={rekapSubject} 
+                                            onChange={e => setRekapSubject(e.target.value)}
+                                            className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                        >
+                                            <option value="ALL">-- Semua Mata Pelajaran --</option>
+                                            {data.subjects.map((subj, idx) => (
+                                                <option key={idx} value={subj}>{subj}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 pt-4 md:pt-0">
+                                        <Button variant="emerald" icon="ph-file-xls" onClick={exportRekapExcel}>
+                                            Excel Rekap
+                                        </Button>
+                                        <Button variant="primary" icon="ph-file-pdf" onClick={exportRekapPDF}>
+                                            PDF Rekap
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            <Card className="!p-0 overflow-hidden">
+                                <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border-b flex justify-between items-center text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                    <span>Total Hari Pertemuan Terdata: <strong className="text-gold-600 text-sm">{rekapData.totalDays} Hari</strong></span>
+                                    <span>Kelas: <strong>{data.classes.find(c => c.id === rekapClass)?.name}</strong> | Matpel: <strong>{rekapSubject === 'ALL' ? 'Semua' : rekapSubject}</strong></span>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse text-xs">
+                                        <thead>
+                                            <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold uppercase border-b">
+                                                <th className="py-3 px-4">No</th>
+                                                <th className="py-3 px-4">NIS</th>
+                                                <th className="py-3 px-4">Nama Siswa</th>
+                                                <th className="py-3 px-4 text-center">L/P</th>
+                                                <th className="py-3 px-4 text-center text-emerald-600">Hadir (H)</th>
+                                                <th className="py-3 px-4 text-center text-blue-600">Sakit (S)</th>
+                                                <th className="py-3 px-4 text-center text-amber-600">Izin (I)</th>
+                                                <th className="py-3 px-4 text-center text-red-600">Alpa (A)</th>
+                                                <th className="py-3 px-4 text-center">% Kehadiran</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {rekapData.list.length > 0 ? (
+                                                rekapData.list.map((s, idx) => (
+                                                    <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                        <td className="py-2.5 px-4 text-slate-400">{idx + 1}</td>
+                                                        <td className="py-2.5 px-4 font-mono">{s.nis}</td>
+                                                        <td className="py-2.5 px-4 font-semibold text-slate-800 dark:text-white">{s.name}</td>
+                                                        <td className="py-2.5 px-4 text-center">{s.gender}</td>
+                                                        <td className="py-2.5 px-4 text-center font-bold text-emerald-600">{s.H}</td>
+                                                        <td className="py-2.5 px-4 text-center font-bold text-blue-600">{s.S}</td>
+                                                        <td className="py-2.5 px-4 text-center font-bold text-amber-600">{s.I}</td>
+                                                        <td className="py-2.5 px-4 text-center font-bold text-red-600">{s.A}</td>
+                                                        <td className="py-2.5 px-4 text-center font-bold">
+                                                            <span className={`px-2 py-0.5 rounded text-xs ${s.pct >= 85 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                                                                {s.pct}%
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr><td colSpan="9" className="py-8 text-center text-slate-400">Tidak ada data siswa untuk kelas ini.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
+                        </>
+                    )}
+                </div>
+            );
+        };
+
+        const ViewNilai = () => {
+            const { data, refreshData, showToast, askConfirm } = useContext(AppContext);
+            const [selectedClass, setSelectedClass] = useState(data.classes[0]?.id || '');
+            const [selectedSubject, setSelectedSubject] = useState(data.subjects[0] || '');
+            const [searchKeyword, setSearchKeyword] = useState('');
+            const [scoreRecords, setScoreRecords] = useState({});
+
+            const [showCatModal, setShowCatModal] = useState(false);
+            const [catForm, setCatForm] = useState({ id: '', name: '', type: 'Formatif' });
+
+            const classStudents = useMemo(() => {
+                return data.students.filter(s => {
+                    const matchClass = s.classId === selectedClass;
+                    const matchSearch = s.name.toLowerCase().includes(searchKeyword.toLowerCase()) || 
+                                        s.nis.toLowerCase().includes(searchKeyword.toLowerCase());
+                    return matchClass && matchSearch;
+                });
+            }, [data.students, selectedClass, searchKeyword]);
+
+            const currentClassName = useMemo(() => {
+                return data.classes.find(c => c.id === selectedClass)?.name || '';
+            }, [data.classes, selectedClass]);
+
+            useEffect(() => {
+                const existing = data.grades.find(g => g.classId === selectedClass && g.subject === selectedSubject);
+                if (existing) {
+                    setScoreRecords(existing.records || {});
+                } else {
+                    setScoreRecords({});
+                }
+            }, [selectedClass, selectedSubject, data.grades]);
+
+            const handleScoreChange = (studentId, catId, val) => {
+                const numericVal = val === '' ? '' : Math.min(100, Math.max(0, Number(val)));
+                setScoreRecords(prev => ({
+                    ...prev,
+                    [studentId]: {
+                        ...(prev[studentId] || {}),
+                        [catId]: numericVal
+                    }
+                }));
+            };
+
+            const handleSaveGrades = () => {
+                DB.saveStudentGrades(selectedClass, selectedSubject, scoreRecords);
+                refreshData();
+                showToast("Daftar nilai murid berhasil disimpan!");
+            };
+
+            const handleSaveCategory = (e) => {
+                e.preventDefault();
+                if (!catForm.name.trim()) {
+                    showToast("Nama komponen nilai wajib diisi!", "error");
+                    return;
+                }
+                DB.saveGradeCategory({
+                    id: catForm.id,
+                    name: catForm.name.trim(),
+                    type: catForm.type
+                });
+                refreshData();
+                setShowCatModal(false);
+                setCatForm({ id: '', name: '', type: 'Formatif' });
+                showToast("Komponen penilaian berhasil ditambahkan!");
+            };
+
+            const handleDeleteCategory = (catId, catName) => {
+                askConfirm({
+                    title: "Hapus Komponen Nilai",
+                    message: `Apakah Anda yakin ingin menghapus kolom "${catName}"? Seluruh nilai terkait kolom ini juga akan terhapus.`,
+                    onConfirm: () => {
+                        DB.deleteGradeCategory(catId);
+                        refreshData();
+                        showToast(`Kolom "${catName}" berhasil dihapus.`);
+                    }
+                });
+            };
+
+            const calculateStudentAvg = (studentId) => {
+                const stScores = scoreRecords[studentId] || {};
+                const validVals = Object.values(stScores).filter(v => v !== '' && v !== null && !isNaN(v));
+                if (validVals.length === 0) return { avg: '-', pred: '-' };
+                const sum = validVals.reduce((a, b) => Number(a) + Number(b), 0);
+                const avg = Math.round((sum / validVals.length) * 10) / 10;
+                
+                let pred = 'D';
+                if (avg >= 88) pred = 'A';
+                else if (avg >= 78) pred = 'B';
+                else if (avg >= 70) pred = 'C';
+
+                return { avg, pred };
+            };
+
+            const exportGradesExcel = () => {
+                if (classStudents.length === 0) {
+                    showToast("Tidak ada siswa untuk diexport!", "error");
+                    return;
+                }
+
+                const excelRows = classStudents.map((s, idx) => {
+                    const row = {
+                        "No": idx + 1,
+                        "NIS": s.nis,
+                        "Nama Siswa": s.name,
+                        "L/P": s.gender,
+                        "Kelas": s.className
+                    };
+
+                    data.gradeCategories.forEach(cat => {
+                        const score = scoreRecords[s.id]?.[cat.id];
+                        row[cat.name] = score !== undefined && score !== '' ? score : '-';
+                    });
+
+                    const { avg, pred } = calculateStudentAvg(s.id);
+                    row["Rata-Rata"] = avg;
+                    row["Predikat"] = pred;
+
+                    return row;
+                });
+
+                const worksheet = XLSX.utils.json_to_sheet(excelRows);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, `Nilai_${currentClassName}`);
+                XLSX.writeFile(workbook, `Daftar_Nilai_Kelas_${currentClassName}_${selectedSubject.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`);
+                showToast("Daftar Nilai berhasil diexport ke Excel!");
+            };
+
+            const exportGradesPDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'mm', 'a4');
+
+                const kop = data.kopSettings;
+                const teacher = data.teacher;
+
+                if (kop.logoLeft) {
+                    try { doc.addImage(kop.logoLeft, 'PNG', 14, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+                if (kop.logoRight) {
+                    try { doc.addImage(kop.logoRight, 'PNG', 263, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.text(kop.line1 || "", 148, 14, { align: "center" });
+                doc.setFontSize(12);
+                doc.text(kop.line2 || "", 148, 20, { align: "center" });
+                doc.setFontSize(13);
+                doc.text(kop.line3 || "", 148, 26, { align: "center" });
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.text(kop.address || "", 148, 31, { align: "center" });
+                doc.text(kop.contact || "", 148, 35, { align: "center" });
+
+                doc.setLineWidth(0.8);
+                doc.line(14, 38, 283, 38);
+                doc.setLineWidth(0.2);
+                doc.line(14, 39, 283, 39);
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.text(`DAFTAR NILAI SISWA (FORMATIF, SUMATIF & PAS)`, 148, 46, { align: "center" });
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Mata Pelajaran : ${selectedSubject}`, 14, 54);
+                doc.text(`Kelas               : Kelas ${currentClassName}`, 14, 59);
+                doc.text(`Tahun Pelajaran : ${teacher.academicYear}`, 200, 54);
+                doc.text(`Guru Pengampu : ${teacher.name}`, 200, 59);
+
+                const headCols = ['No', 'NIS', 'Nama Siswa', 'L/P'];
+                data.gradeCategories.forEach(cat => headCols.push(cat.name));
+                headCols.push('Rata-Rata', 'Predikat');
+
+                const tableBody = classStudents.map((s, i) => {
+                    const row = [i + 1, s.nis, s.name, s.gender];
+                    data.gradeCategories.forEach(cat => {
+                        const score = scoreRecords[s.id]?.[cat.id];
+                        row.push(score !== undefined && score !== '' ? score : '-');
+                    });
+                    const { avg, pred } = calculateStudentAvg(s.id);
+                    row.push(avg, pred);
+                    return row;
+                });
+
+                doc.autoTable({
+                    startY: 64,
+                    head: [headCols],
+                    body: tableBody,
+                    styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+                    headStyles: { fillColor: [197, 149, 53], textColor: 255, fontStyle: 'bold' },
+                    columnStyles: {
+                        0: { cellWidth: 10 },
+                        1: { cellWidth: 22 },
+                        2: { cellWidth: 'auto', halign: 'left' },
+                        3: { cellWidth: 12 },
+                    }
+                });
+
+                const finalY = doc.lastAutoTable.finalY + 12;
+                if (finalY < 180) {
+                    doc.text(`Gorontalo, ${formatDate(new Date().toISOString())}`, 200, finalY);
+                    doc.text("Mengetahui,", 14, finalY + 4);
+                    doc.text("Kepala Madrasah / Sekolah", 14, finalY + 8);
+                    doc.text("Guru Mata Pelajaran", 200, finalY + 8);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.headmasterName || "Kepala Sekolah", 14, finalY + 26);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.headmasterNip || '-'}`, 14, finalY + 30);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.name, 200, finalY + 26);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.nip}`, 200, finalY + 30);
+                }
+
+                doc.save(`Daftar_Nilai_Kelas_${currentClassName}_${selectedSubject.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+                showToast("Daftar Nilai PDF berhasil dicetak!");
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-chart-bar text-gold-500"></i>
+                                Daftar Nilai Murid
+                            </h2>
+                            <p className="text-sm text-slate-500">Input nilai formatif, sumatif, PAS, tambah/kurang komponen nilai, & export file Excel/PDF.</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button variant="emerald" icon="ph-file-xls" onClick={exportGradesExcel}>
+                                Export Excel
+                            </Button>
+                            <Button variant="primary" icon="ph-file-pdf" onClick={exportGradesPDF}>
+                                Export PDF
+                            </Button>
+                            <Button variant="secondary" icon="ph-plus-circle" onClick={() => { setCatForm({ id: '', name: '', type: 'Formatif' }); setShowCatModal(true); }}>
+                                Tambah Kolom Nilai
+                            </Button>
+                        </div>
+                    </div>
+
+                    <Card className="!p-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Kelas</label>
+                                <select 
+                                    value={selectedClass} 
+                                    onChange={e => setSelectedClass(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                >
+                                    {data.classes.map(c => (
+                                        <option key={c.id} value={c.id}>Kelas {c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih Mata Pelajaran</label>
+                                <select 
+                                    value={selectedSubject} 
+                                    onChange={e => setSelectedSubject(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm font-medium outline-none"
+                                >
+                                    {data.subjects.map((s, idx) => (
+                                        <option key={idx} value={s}>{s}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Cari Nama / NIS</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Kata kunci..." 
+                                    value={searchKeyword} 
+                                    onChange={e => setSearchKeyword(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm outline-none"
+                                />
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card className="!p-0 overflow-hidden">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/40 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                            <div className="text-slate-600 dark:text-slate-300 font-semibold">
+                                Kelas: <strong className="text-gold-600">{currentClassName}</strong> | Mata Pelajaran: <strong>{selectedSubject}</strong> | Total Siswa: <strong>{classStudents.length}</strong>
+                            </div>
+                            <Button variant="emerald" icon="ph-floppy-disk" onClick={handleSaveGrades} className="!py-1.5 !text-xs">
+                                Simpan Perubahan Nilai
+                            </Button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold uppercase border-b border-slate-200 dark:border-slate-800">
+                                        <th className="py-3 px-3 min-w-[40px]">No</th>
+                                        <th className="py-3 px-3 min-w-[80px]">NIS</th>
+                                        <th className="py-3 px-3 min-w-[150px]">Nama Siswa</th>
+                                        <th className="py-3 px-3 text-center min-w-[50px]">L/P</th>
+                                        
+                                        {data.gradeCategories.map(cat => (
+                                            <th key={cat.id} className="py-3 px-2 text-center min-w-[90px] border-l border-slate-200 dark:border-slate-700">
+                                                <div className="flex items-center justify-between gap-1">
+                                                    <span className="truncate">{cat.name}</span>
+                                                    <button onClick={() => handleDeleteCategory(cat.id, cat.name)} className="text-slate-400 hover:text-red-500">
+                                                        <i className="ph ph-x-circle text-sm"></i>
+                                                    </button>
+                                                </div>
+                                            </th>
+                                        ))}
+
+                                        <th className="py-3 px-3 text-center min-w-[80px] bg-gold-50 dark:bg-gold-900/20 text-gold-800 dark:text-gold-300 border-l">Rata2</th>
+                                        <th className="py-3 px-3 text-center min-w-[70px] bg-gold-50 dark:bg-gold-900/20 text-gold-800 dark:text-gold-300">Predikat</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                    {classStudents.length > 0 ? (
+                                        classStudents.map((s, idx) => {
+                                            const { avg, pred } = calculateStudentAvg(s.id);
+                                            return (
+                                                <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                                    <td className="py-2.5 px-3 text-slate-400">{idx + 1}</td>
+                                                    <td className="py-2.5 px-3 font-mono">{s.nis}</td>
+                                                    <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-white">{s.name}</td>
+                                                    <td className="py-2.5 px-3 text-center">{s.gender}</td>
+                                                    
+                                                    {data.gradeCategories.map(cat => {
+                                                        const currentVal = scoreRecords[s.id]?.[cat.id] !== undefined ? scoreRecords[s.id][cat.id] : '';
+                                                        return (
+                                                            <td key={cat.id} className="py-1 px-1 border-l border-slate-100 dark:border-slate-800">
+                                                                <input 
+                                                                    type="number" 
+                                                                    min="0" 
+                                                                    max="100" 
+                                                                    value={currentVal} 
+                                                                    onChange={e => handleScoreChange(s.id, cat.id, e.target.value)} 
+                                                                    placeholder="0-100"
+                                                                    className="w-full text-center py-1 px-1 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-darkcard focus:ring-1 focus:ring-gold-500 text-xs font-semibold outline-none"
+                                                                />
+                                                            </td>
+                                                        );
+                                                    })}
+
+                                                    <td className="py-2.5 px-3 text-center font-bold text-gold-600 bg-gold-50/30 dark:bg-gold-900/10 border-l">{avg}</td>
+                                                    <td className="py-2.5 px-3 text-center font-bold bg-gold-50/30 dark:bg-gold-900/10">
+                                                        <span className={`px-2 py-0.5 rounded text-xs ${pred === 'A' ? 'bg-emerald-100 text-emerald-800' : pred === 'B' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'}`}>{pred}</span>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    ) : (
+                                        <tr><td colSpan={5 + data.gradeCategories.length} className="py-8 text-center text-slate-400">Belum ada siswa di kelas ini.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+
+                    {showCatModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                            <div className="bg-white dark:bg-darkcard rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+                                <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4">Tambah Kolom Penilaian</h3>
+                                <form onSubmit={handleSaveCategory} className="space-y-4">
+                                    <Input 
+                                        label="Nama Komponen / Kolom" 
+                                        placeholder="Contoh: Formatif 3 / PH 1 / Tugas" 
+                                        value={catForm.name} 
+                                        onChange={e => setCatForm({ ...catForm, name: e.target.value })} 
+                                        required 
+                                    />
+                                    <Select 
+                                        label="Jenis Penilaian" 
+                                        value={catForm.type} 
+                                        onChange={e => setCatForm({ ...catForm, type: e.target.value })} 
+                                        options={[{ value: 'Formatif', label: 'Formatif' }, { value: 'Sumatif', label: 'Sumatif Lingkup Materi' }, { value: 'PAS', label: 'Sumatif Akhir Semester (PAS/PAT)' }]} 
+                                    />
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <Button variant="ghost" onClick={() => setShowCatModal(false)}>Batal</Button>
+                                        <Button type="submit">Tambah Kolom</Button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ViewMatpel = () => {
+            const { data, refreshData, showToast, askConfirm } = useContext(AppContext);
+            const [newSubj, setNewSubj] = useState('');
+
+            const handleAddSubject = (e) => {
+                e.preventDefault();
+                if (!newSubj.trim()) return;
+                DB.saveSubject(newSubj.trim());
+                refreshData();
+                setNewSubj('');
+                showToast("Mata pelajaran berhasil ditambahkan!");
+            };
+
+            const handleDeleteSubject = (name) => {
+                askConfirm({
+                    title: "Hapus Mata Pelajaran",
+                    message: `Yakin hapus matpel "${name}"?`,
+                    onConfirm: () => {
+                        DB.deleteSubject(name);
+                        refreshData();
+                        showToast("Mata pelajaran berhasil dihapus.");
+                    }
+                });
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-book-bookmark text-gold-500"></i>
+                                Kelola Mata Pelajaran
+                            </h2>
+                            <p className="text-sm text-slate-500">Tambah atau hapus mata pelajaran yang diajar.</p>
+                        </div>
+                    </div>
+
+                    <Card className="max-w-md">
+                        <form onSubmit={handleAddSubject} className="flex gap-2">
+                            <input 
+                                type="text" 
+                                placeholder="Nama Mata Pelajaran..." 
+                                value={newSubj} 
+                                onChange={e => setNewSubj(e.target.value)} 
+                                required
+                                className="flex-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm outline-none"
+                            />
+                            <Button type="submit" variant="primary" icon="ph-plus">Tambah</Button>
+                        </form>
+                    </Card>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {data.subjects.map((subj, idx) => (
+                            <Card key={idx} className="flex items-center justify-between !p-4 hover:border-gold-500 transition-all">
+                                <span className="font-semibold text-slate-800 dark:text-white text-sm">{subj}</span>
+                                <button onClick={() => handleDeleteSubject(subj)} className="text-slate-400 hover:text-red-600 p-1">
+                                    <i className="ph ph-trash text-lg"></i>
+                                </button>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ViewJurnalList = () => {
+            const { data, refreshData, setCurrentView, showToast, askConfirm } = useContext(AppContext);
+            const [filterClass, setFilterClass] = useState('ALL');
+            const [search, setSearch] = useState('');
+
+            const filtered = useMemo(() => {
+                return data.journals.filter(j => {
+                    const matchClass = filterClass === 'ALL' || j.classId === filterClass;
+                    const matchSearch = j.material?.toLowerCase().includes(search.toLowerCase()) || 
+                                        j.subject?.toLowerCase().includes(search.toLowerCase());
+                    return matchClass && matchSearch;
+                });
+            }, [data.journals, filterClass, search]);
+
+            const handleDelete = (id) => {
+                askConfirm({
+                    title: "Hapus Jurnal",
+                    message: "Yakin ingin menghapus jurnal harian ini?",
+                    onConfirm: () => {
+                        DB.deleteJournal(id);
+                        refreshData();
+                        showToast("Jurnal berhasil dihapus.");
+                    }
+                });
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                                <i className="ph ph-book-open-text text-gold-500"></i>
+                                Rekam Jurnal Harian Mengajar
+                            </h2>
+                            <p className="text-sm text-slate-500">Daftar semua jurnal mengajar yang tersimpan.</p>
+                        </div>
+                        <Button variant="primary" icon="ph-plus-circle" onClick={() => setCurrentView('jurnal_form')}>Tambah Jurnal</Button>
+                    </div>
+
+                    <Card className="!p-4">
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <select value={filterClass} onChange={e => setFilterClass(e.target.value)} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-darkcard outline-none">
+                                <option value="ALL">-- Semua Kelas --</option>
+                                {data.classes.map(c => <option key={c.id} value={c.id}>Kelas {c.name}</option>)}
+                            </select>
+                            <input type="text" placeholder="Cari materi / matpel..." value={search} onChange={e => setSearch(e.target.value)} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-darkcard outline-none flex-1" />
+                        </div>
+                    </Card>
+
+                    <div className="space-y-4">
+                        {filtered.length > 0 ? (
+                            filtered.map(j => (
+                                <Card key={j.id} className="hover:border-gold-500 transition-all">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b pb-3 mb-3 border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center gap-3">
+                                            <span className="px-3 py-1 rounded-full bg-gold-100 text-gold-800 text-xs font-bold">Kelas {j.className}</span>
+                                            <span className="font-semibold text-slate-800 dark:text-white text-sm">{j.subject}</span>
+                                            <span className="text-xs text-slate-400">| {j.jamKe}</span>
+                                        </div>
+                                        <div className="text-xs text-slate-500 font-medium">{formatDate(j.date)}</div>
+                                    </div>
+                                    <div className="space-y-2 text-sm">
+                                        <p><strong className="text-slate-700 dark:text-slate-300">Materi:</strong> {j.material}</p>
+                                        <p><strong className="text-slate-700 dark:text-slate-300">Kegiatan:</strong> {j.activities}</p>
+                                        {j.notes && <p className="text-xs text-slate-500 italic">Catatan: {j.notes}</p>}
+                                    </div>
+                                    <div className="flex justify-end gap-2 border-t mt-4 pt-2 border-slate-100 dark:border-slate-800">
+                                        <button onClick={() => handleDelete(j.id)} className="text-xs text-red-600 hover:underline">Hapus</button>
+                                    </div>
+                                </Card>
+                            ))
+                        ) : (
+                            <Card className="text-center py-12 text-slate-400">Belum ada jurnal terdata.</Card>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ViewJurnalForm = () => {
+            const { data, refreshData, setCurrentView, showToast } = useContext(AppContext);
+            const [form, setForm] = useState({
+                date: new Date().toISOString().split('T')[0],
+                classId: data.classes[0]?.id || '',
+                subject: data.subjects[0] || '',
+                jamKe: 'Jam Ke 1 - 2 (07:30 - 09:00)',
+                material: '',
+                activities: '',
+                notes: ''
+            });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!form.material.trim()) {
+                    showToast("Materi pembelajaran wajib diisi!", "error");
+                    return;
+                }
+                const cls = data.classes.find(c => c.id === form.classId);
+                DB.saveJournal({
+                    ...form,
+                    className: cls ? cls.name : 'VII-A'
+                });
+                refreshData();
+                showToast("Jurnal harian mengajar berhasil disimpan!");
+                setCurrentView('jurnal_list');
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6 max-w-2xl mx-auto">
+                    <div>
+                        <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                            <i className="ph ph-plus-circle text-gold-500"></i>
+                            Tambah Jurnal Harian Mengajar
+                        </h2>
+                        <p className="text-sm text-slate-500">Isi catatan aktivitas KBM harian secara mendalam.</p>
+                    </div>
+
+                    <Card>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <Input label="Tanggal KBM" type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} required />
+                                <Select label="Kelas" value={form.classId} onChange={e => setForm({...form, classId: e.target.value})} options={data.classes.map(c => ({ value: c.id, label: `Kelas ${c.name}` }))} required />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <Select label="Mata Pelajaran" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} options={data.subjects} required />
+                                <Input label="Jam Ke / Waktu" value={form.jamKe} onChange={e => setForm({...form, jamKe: e.target.value})} required />
+                            </div>
+
+                            <Input label="Materi Pokok / CP / TP" placeholder="Contoh: Menelaah Struktur Teks Deskripsi" value={form.material} onChange={e => setForm({...form, material: e.target.value})} required />
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Aktivitas Pembelajaran</label>
+                                <textarea rows="3" placeholder="Siswa mendiskusikan materi..." value={form.activities} onChange={e => setForm({...form, activities: e.target.value})} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm outline-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Catatan / Hambatan (Opsional)</label>
+                                <textarea rows="2" placeholder="Catatan khusus..." value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-darkcard text-sm outline-none"></textarea>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4">
+                                <Button variant="ghost" onClick={() => setCurrentView('jurnal_list')}>Batal</Button>
+                                <Button type="submit" variant="primary" icon="ph-floppy-disk">Simpan Jurnal</Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ViewJurnalExport = () => {
+            const { data, showToast } = useContext(AppContext);
+            const [exportClass, setExportClass] = useState('ALL');
+            const [exportMonth, setExportMonth] = useState(new Date().toISOString().substr(0, 7));
+
+            const filteredJournals = useMemo(() => {
+                return data.journals.filter(j => {
+                    const matchClass = exportClass === 'ALL' || j.classId === exportClass;
+                    const matchMonth = j.date.startsWith(exportMonth);
+                    return matchClass && matchMonth;
+                });
+            }, [data.journals, exportClass, exportMonth]);
+
+            const generatePDF = () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const kop = data.kopSettings;
+                const teacher = data.teacher;
+
+                if (kop.logoLeft) {
+                    try { doc.addImage(kop.logoLeft, 'PNG', 12, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+                if (kop.logoRight) {
+                    try { doc.addImage(kop.logoRight, 'PNG', 178, 10, kop.logoSize || 20, kop.logoSize || 20); } catch(e){}
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.text(kop.line1 || "", 105, 15, { align: "center" });
+                doc.setFontSize(12);
+                doc.text(kop.line2 || "", 105, 21, { align: "center" });
+                doc.setFontSize(13);
+                doc.text(kop.line3 || "", 105, 27, { align: "center" });
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.text(kop.address || "", 105, 32, { align: "center" });
+                doc.text(kop.contact || "", 105, 36, { align: "center" });
+
+                doc.setLineWidth(0.8);
+                doc.line(12, 39, 198, 39);
+                doc.setLineWidth(0.2);
+                doc.line(12, 40, 198, 40);
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(12);
+                doc.text(`JURNAL HARIAN MENGAJAR GURU`, 105, 48, { align: "center" });
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Nama Guru    : ${teacher.name}`, 12, 56);
+                doc.text(`NIP                 : ${teacher.nip}`, 12, 61);
+                doc.text(`Bulan / Tahun : ${exportMonth}`, 135, 56);
+                doc.text(`Fase              : Phase ${teacher.phase}`, 135, 61);
+
+                const tableBody = filteredJournals.map((j, i) => [
+                    i + 1,
+                    j.date,
+                    j.className,
+                    j.subject,
+                    j.jamKe,
+                    j.material,
+                    j.activities
+                ]);
+
+                doc.autoTable({
+                    startY: 67,
+                    head: [['No', 'Tanggal', 'Kelas', 'Matpel', 'Jam', 'Materi', 'Kegiatan']],
+                    body: tableBody,
+                    styles: { fontSize: 8, cellPadding: 2.5 },
+                    headStyles: { fillColor: [197, 149, 53], textColor: 255, fontStyle: 'bold' }
+                });
+
+                const finalY = doc.lastAutoTable.finalY + 15;
+                if (finalY < 250) {
+                    doc.text(`Gorontalo, ${formatDate(new Date().toISOString())}`, 135, finalY);
+                    doc.text("Mengetahui,", 12, finalY + 5);
+                    doc.text("Kepala Madrasah / Sekolah", 12, finalY + 10);
+                    doc.text("Guru Mata Pelajaran", 135, finalY + 10);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.headmasterName || "Kepala Sekolah", 12, finalY + 30);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.headmasterNip || '-'}`, 12, finalY + 34);
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text(teacher.name, 135, finalY + 30);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`NIP. ${teacher.nip}`, 135, finalY + 34);
+                }
+
+                doc.save(`Rekap_Jurnal_Harian_${exportMonth}.pdf`);
+                showToast("Rekap Jurnal PDF berhasil diunduh!");
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div>
+                        <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                            <i className="ph ph-printer text-gold-500"></i>
+                            Export Jurnal Harian (PDF)
+                        </h2>
+                        <p className="text-sm text-slate-500">Cetak rekap jurnal harian lengkap dengan Kop & Tanda Tangan.</p>
+                    </div>
+
+                    <Card className="max-w-xl">
+                        <div className="space-y-4">
+                            <Input label="Bulan & Tahun Jurnal" type="month" value={exportMonth} onChange={e => setExportMonth(e.target.value)} />
+                            <Select label="Filter Kelas" value={exportClass} onChange={e => setExportClass(e.target.value)} options={[{ value: 'ALL', label: '-- Semua Kelas --' }, ...data.classes.map(c => ({ value: c.id, label: `Kelas ${c.name}` }))]} />
+                            <p className="text-xs text-slate-500">Total jurnal siap cetak: <strong>{filteredJournals.length} item</strong></p>
+                            <Button variant="primary" icon="ph-file-pdf" onClick={generatePDF} className="w-full">Unduh Rekap Jurnal PDF</Button>
+                        </div>
+                    </Card>
+                </div>
+            );
+        };
+
+        const ViewAppSettings = () => {
+            const { data, refreshData, showToast, askConfirm } = useContext(AppContext);
+            
+            // Kop Settings State
+            const [kop, setKop] = useState(data.kopSettings || defaultKopSettings);
+            // App Settings State
+            const [app, setApp] = useState(data.appSettings || initialData.appSettings);
+            // Teacher Profile State
+            const [teacher, setTeacher] = useState(data.teacher || initialData.teacher);
+
+            const fileLogoLeftRef = useRef(null);
+            const fileLogoRightRef = useRef(null);
+            const fileAppLogoRef = useRef(null);
+
+            // Handle Logo Kiri Upload
+            const handleLogoLeftUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const compressed = await compressImage(file, 250, 250, 0.85);
+                    setKop(prev => ({ ...prev, logoLeft: compressed }));
+                    showToast("Logo Kiri berhasil diunggah!");
+                } catch(err) {
+                    showToast("Gagal memproses gambar logo!", "error");
+                }
+                e.target.value = null;
+            };
+
+            // Handle Logo Kanan Upload
+            const handleLogoRightUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const compressed = await compressImage(file, 250, 250, 0.85);
+                    setKop(prev => ({ ...prev, logoRight: compressed }));
+                    showToast("Logo Kanan berhasil diunggah!");
+                } catch(err) {
+                    showToast("Gagal memproses gambar logo!", "error");
+                }
+                e.target.value = null;
+            };
+
+            // Handle App Logo Upload
+            const handleAppLogoUpload = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                try {
+                    const compressed = await compressImage(file, 200, 200, 0.85);
+                    setApp(prev => ({ ...prev, appLogo: compressed }));
+                    showToast("Logo Aplikasi berhasil diunggah!");
+                } catch(err) {
+                    showToast("Gagal memproses gambar logo!", "error");
+                }
+                e.target.value = null;
+            };
+
+            // Save All Settings
+            const handleSaveAllSettings = (e) => {
+                e.preventDefault();
+                DB.saveKopSettings(kop);
+                DB.saveAppSettings(app);
+                DB.saveTeacher(teacher);
+                refreshData();
+                showToast("Pengaturan Kop, Logo & Profil Aplikasi Berhasil Disimpan!");
+            };
+
+            const handleResetKop = () => {
+                askConfirm({
+                    title: "Reset Kop Surat",
+                    message: "Apakah Anda yakin ingin mengembalikan Kop Surat ke pengaturan awal?",
+                    onConfirm: () => {
+                        setKop(defaultKopSettings);
+                        DB.saveKopSettings(defaultKopSettings);
+                        refreshData();
+                        showToast("Kop Surat berhasil di-reset ke default.");
+                    }
+                });
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6">
+                    <div>
+                        <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                            <i className="ph ph-gear text-gold-500"></i>
+                            Pengaturan Kop Surat, Logo & Aplikasi
+                        </h2>
+                        <p className="text-sm text-slate-500">Atur Kop Surat instansi, unggah Logo Kiri & Kanan, serta ubah judul aplikasi.</p>
+                    </div>
+
+                    <form onSubmit={handleSaveAllSettings} className="space-y-6">
+                        {/* Interactive Kop Surat Preview */}
+                        <Card className="!p-6 border-2 border-gold-400/30 bg-white dark:bg-darkcard">
+                            <div className="flex items-center justify-between mb-4 border-b pb-2">
+                                <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider">
+                                    <i className="ph ph-eye text-gold-500 text-lg"></i> Live Pratinjau Kop Surat (PDF / Cetak)
+                                </h3>
+                                <Button variant="ghost" icon="ph-arrow-counter-clockwise" onClick={handleResetKop} className="!text-xs">
+                                    Reset Default
+                                </Button>
+                            </div>
+
+                            <div className="p-6 border rounded-xl bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between gap-4 font-sans text-center text-slate-900 dark:text-slate-100">
+                                {kop.logoLeft ? (
+                                    <img src={kop.logoLeft} alt="Logo Kiri" className="w-16 h-16 object-contain flex-shrink-0" />
+                                ) : (
+                                    <div className="w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center text-[10px] text-slate-400 flex-shrink-0">
+                                        <span>Logo Kiri</span>
+                                    </div>
+                                )}
+
+                                <div className="flex-1 space-y-0.5">
+                                    <p className="font-bold text-xs uppercase tracking-tight">{kop.line1 || "NAMA KEMENTERIAN / YAYASAN"}</p>
+                                    <p className="font-bold text-sm uppercase tracking-tight">{kop.line2 || "NAMA DINAS / KANTOR KABUPATEN"}</p>
+                                    <p className="font-extrabold text-base uppercase text-gold-600 dark:text-gold-400 tracking-tight">{kop.line3 || "NAMA SATUAN PENDIDIKAN / SEKOLAH"}</p>
+                                    <p className="text-[11px] text-slate-600 dark:text-slate-400">{kop.address}</p>
+                                    <p className="text-[10px] text-slate-500">{kop.contact}</p>
+                                </div>
+
+                                {kop.logoRight ? (
+                                    <img src={kop.logoRight} alt="Logo Kanan" className="w-16 h-16 object-contain flex-shrink-0" />
+                                ) : (
+                                    <div className="w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center text-[10px] text-slate-400 flex-shrink-0">
+                                        <span>Logo Kanan</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mt-2 border-b-2 border-slate-800 dark:border-slate-200"></div>
+                            <div className="mt-0.5 border-b border-slate-800 dark:border-slate-200"></div>
+                        </Card>
+
+                        {/* Pengaturan Kop & Logo Uploads */}
+                        <Card>
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                                <i className="ph ph-image text-gold-500"></i> Kelola Gambar Logo (Kiri, Kanan, & App)
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {/* Logo Kiri */}
+                                <div className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800/30 text-center space-y-3">
+                                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Logo Kiri (Kemenag / Pemda / Yayasan)</p>
+                                    <div className="w-24 h-24 mx-auto border bg-white dark:bg-darkcard rounded-xl p-2 flex items-center justify-center">
+                                        {kop.logoLeft ? (
+                                            <img src={kop.logoLeft} alt="Logo Kiri" className="max-h-full max-w-full object-contain" />
+                                        ) : (
+                                            <i className="ph ph-image-square text-3xl text-slate-300"></i>
+                                        )}
+                                    </div>
+                                    <input type="file" ref={fileLogoLeftRef} onChange={handleLogoLeftUpload} accept="image/*" className="hidden" />
+                                    <div className="flex gap-2 justify-center">
+                                        <Button variant="secondary" icon="ph-upload-simple" onClick={() => fileLogoLeftRef.current.click()} className="!py-1.5 !text-xs">
+                                            Pilih File
+                                        </Button>
+                                        {kop.logoLeft && (
+                                            <Button variant="danger" icon="ph-trash" onClick={() => setKop({...kop, logoLeft: ''})} className="!py-1.5 !text-xs">
+                                                Hapus
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Logo Kanan */}
+                                <div className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800/30 text-center space-y-3">
+                                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Logo Kanan (Sekolah / Tut Wuri / Logo 2)</p>
+                                    <div className="w-24 h-24 mx-auto border bg-white dark:bg-darkcard rounded-xl p-2 flex items-center justify-center">
+                                        {kop.logoRight ? (
+                                            <img src={kop.logoRight} alt="Logo Kanan" className="max-h-full max-w-full object-contain" />
+                                        ) : (
+                                            <i className="ph ph-image-square text-3xl text-slate-300"></i>
+                                        )}
+                                    </div>
+                                    <input type="file" ref={fileLogoRightRef} onChange={handleLogoRightUpload} accept="image/*" className="hidden" />
+                                    <div className="flex gap-2 justify-center">
+                                        <Button variant="secondary" icon="ph-upload-simple" onClick={() => fileLogoRightRef.current.click()} className="!py-1.5 !text-xs">
+                                            Pilih File
+                                        </Button>
+                                        {kop.logoRight && (
+                                            <Button variant="danger" icon="ph-trash" onClick={() => setKop({...kop, logoRight: ''})} className="!py-1.5 !text-xs">
+                                                Hapus
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Logo Aplikasi Header */}
+                                <div className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-800/30 text-center space-y-3">
+                                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Logo Branding Aplikasi Header</p>
+                                    <div className="w-24 h-24 mx-auto border bg-white dark:bg-darkcard rounded-xl p-2 flex items-center justify-center">
+                                        {app.appLogo ? (
+                                            <img src={app.appLogo} alt="App Logo" className="max-h-full max-w-full object-contain" />
+                                        ) : (
+                                            <i className="ph ph-squares-four text-3xl text-slate-300"></i>
+                                        )}
+                                    </div>
+                                    <input type="file" ref={fileAppLogoRef} onChange={handleAppLogoUpload} accept="image/*" className="hidden" />
+                                    <div className="flex gap-2 justify-center">
+                                        <Button variant="secondary" icon="ph-upload-simple" onClick={() => fileAppLogoRef.current.click()} className="!py-1.5 !text-xs">
+                                            Pilih File
+                                        </Button>
+                                        {app.appLogo && (
+                                            <Button variant="danger" icon="ph-trash" onClick={() => setApp({...app, appLogo: ''})} className="!py-1.5 !text-xs">
+                                                Hapus
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* Teks Kop Surat Editor */}
+                        <Card>
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                                <i className="ph ph-text-align-center text-gold-500"></i> Teks Kop Surat Instansi
+                            </h3>
+
+                            <div className="space-y-3">
+                                <Input label="Baris Kop 1 (Instansi Atas)" value={kop.line1} onChange={e => setKop({...kop, line1: e.target.value})} placeholder="Contoh: KEMENTERIAN AGAMA REPUBLIK INDONESIA" />
+                                <Input label="Baris Kop 2 (Kantor / Dinas Kabupaten)" value={kop.line2} onChange={e => setKop({...kop, line2: e.target.value})} placeholder="Contoh: KANTOR KEMENTERIAN AGAMA KABUPATEN GORONTALO" />
+                                <Input label="Baris Kop 3 (Nama Sekolah / Madrasah)" value={kop.line3} onChange={e => setKop({...kop, line3: e.target.value})} placeholder="Contoh: MADRASAH TSANAWIYAH NEGERI 2 KABUPATEN GORONTALO" />
+                                <Input label="Alamat Lengkap Sekolah" value={kop.address} onChange={e => setKop({...kop, address: e.target.value})} placeholder="Jl. Ahmad A. Wahab No. 123..." />
+                                <Input label="Kontak / Email / Telp" value={kop.contact} onChange={e => setKop({...kop, contact: e.target.value})} placeholder="Email: ... | Telp: ..." />
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        Ukuran Logo pada Cetak PDF: <span className="font-bold text-gold-600">{kop.logoSize || 20} mm</span>
+                                    </label>
+                                    <input 
+                                        type="range" 
+                                        min="15" 
+                                        max="35" 
+                                        value={kop.logoSize || 20} 
+                                        onChange={e => setKop({...kop, logoSize: Number(e.target.value)})}
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-gold-500"
+                                    />
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* Profile & Branding Application */}
+                        <Card>
+                            <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                                <i className="ph ph-desktop text-gold-500"></i> Identitas Aplikasi & Tema Warna
+                            </h3>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <Input label="Judul Aplikasi" value={app.appTitle} onChange={e => setApp({...app, appTitle: e.target.value})} />
+                                <Input label="Sub-Judul Aplikasi" value={app.appSubtitle} onChange={e => setApp({...app, appSubtitle: e.target.value})} />
+                                <Input label="Awalan Salam Dashboard" value={app.greetingPrefix} onChange={e => setApp({...app, greetingPrefix: e.target.value})} />
+                                <Input label="Teks Sapaan Utama" value={app.dashboardGreetingText} onChange={e => setApp({...app, dashboardGreetingText: e.target.value})} />
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tema Warna Utama Aplikasi</label>
+                                <div className="flex flex-wrap gap-3">
+                                    {[
+                                        { id: 'gold', name: 'Emas / Gold', color: 'bg-amber-500' },
+                                        { id: 'emerald', name: 'Hijau Emerald', color: 'bg-emerald-500' },
+                                        { id: 'indigo', name: 'Biru Nila / Indigo', color: 'bg-indigo-500' },
+                                        { id: 'rose', name: 'Merah Mawar / Rose', color: 'bg-rose-500' },
+                                    ].map(t => (
+                                        <button
+                                            key={t.id}
+                                            type="button"
+                                            onClick={() => setApp({ ...app, themeColor: t.id })}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                                                app.themeColor === t.id 
+                                                    ? 'border-gold-500 bg-gold-50 dark:bg-gold-900/30 text-gold-700 dark:text-gold-300 shadow-sm ring-2 ring-gold-500' 
+                                                    : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                                            }`}
+                                        >
+                                            <span className={`w-3.5 h-3.5 rounded-full ${t.color}`}></span>
+                                            {t.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </Card>
+
+                        <div className="flex justify-end gap-3 sticky bottom-4 z-20">
+                            <Button type="submit" variant="primary" icon="ph-floppy-disk" className="!px-8 !py-3 shadow-xl">
+                                Simpan Semua Pengaturan Kop & Logo
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            );
+        };
+
+        const ViewAccountSecurity = () => {
+            const { data, refreshData, showToast } = useContext(AppContext);
+            const [teacherForm, setTeacherForm] = useState(data.teacher);
+
+            const handleSaveProfile = (e) => {
+                e.preventDefault();
+                DB.saveTeacher(teacherForm);
+                refreshData();
+                showToast("Profil Guru & Keamanan berhasil diperbarui!");
+            };
+
+            return (
+                <div className="animate-fade-in space-y-6 max-w-2xl mx-auto">
+                    <div>
+                        <h2 className="text-2xl font-bold font-display text-slate-800 dark:text-white flex items-center gap-2">
+                            <i className="ph ph-shield-check text-gold-500"></i>
+                            Akun Guru & Keamanan
+                        </h2>
+                        <p className="text-sm text-slate-500">Atur profil guru, NIP, serta Kepala Sekolah untuk tanda tangan PDF.</p>
+                    </div>
+
+                    <Card>
+                        <form onSubmit={handleSaveProfile} className="space-y-4">
+                            <Input label="Nama Lengkap Guru (dengan Gelar)" value={teacherForm.name} onChange={e => setTeacherForm({...teacherForm, name: e.target.value})} required />
+                            <Input label="NIP Guru" value={teacherForm.nip} onChange={e => setTeacherForm({...teacherForm, nip: e.target.value})} required />
+                            <Input label="Nama Kepala Sekolah / Madrasah" value={teacherForm.headmasterName} onChange={e => setTeacherForm({...teacherForm, headmasterName: e.target.value})} required />
+                            <Input label="NIP Kepala Sekolah" value={teacherForm.headmasterNip} onChange={e => setTeacherForm({...teacherForm, headmasterNip: e.target.value})} required />
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <Input label="Fase Mengajar" value={teacherForm.phase} onChange={e => setTeacherForm({...teacherForm, phase: e.target.value})} />
+                                <Input label="Tahun Pelajaran" value={teacherForm.academicYear} onChange={e => setTeacherForm({...teacherForm, academicYear: e.target.value})} />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t">
+                                <Input label="Username Login" value={teacherForm.username} onChange={e => setTeacherForm({...teacherForm, username: e.target.value})} />
+                                <Input label="Password Login" type="password" value={teacherForm.password} onChange={e => setTeacherForm({...teacherForm, password: e.target.value})} />
+                            </div>
+
+                            <div className="flex justify-end pt-4">
+                                <Button type="submit" variant="primary" icon="ph-floppy-disk">Simpan Profil & Akun</Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const { currentView } = useContext(AppContext);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+
+            const renderView = () => {
+                switch(currentView) {
+                    case 'dashboard': return <ViewDashboard />;
+                    case 'siswa': return <ViewSiswa />;
+                    case 'kelas': return <ViewKelas />;
+                    case 'presensi': return <ViewPresensi />;
+                    case 'nilai': return <ViewNilai />;
+                    case 'matpel': return <ViewMatpel />;
+                    case 'jurnal_list': return <ViewJurnalList />;
+                    case 'jurnal_form': return <ViewJurnalForm />;
+                    case 'jurnal_export': return <ViewJurnalExport />;
+                    case 'app_settings': return <ViewAppSettings />;
+                    case 'account_security': return <ViewAccountSecurity />;
+                    default: return <ViewDashboard />;
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col lg:flex-row">
+                    <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+                    
+                    <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+                        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+                        
+                        <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
+                            {renderView()}
+                        </main>
+
+                        <footer className="py-4 text-center text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800 mt-8">
+                            &copy; {new Date().getFullYear()} JELAS - Jurnal Harian Guru, Presensi & Daftar Nilai. All rights reserved.
+                        </footer>
+                    </div>
+                </div>
+            );
+        };
+
+        const RootApp = () => (
+            <AppProvider>
+                <App />
+            </AppProvider>
+        );
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<RootApp />);
+    </script>
+</body>
+</html>
